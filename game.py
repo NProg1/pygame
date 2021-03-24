@@ -133,6 +133,14 @@ while running:
             new_enemy = Enemy()
             enemies.add(new_enemy)
             all_sprites.add(new_enemy)
+    
+    # check to see if a bullet hit a enemy
+    hits = pygame.sprite.groupcollide(enemies, bullets, True, True)
+    # replace killed enemy with new enemy
+    for hit in hits:
+        m = Enemy()
+        all_sprites.add(m)
+        enemies.add(m)
 
     # Update enemy position
     enemies.update()
