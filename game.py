@@ -1,6 +1,7 @@
 import pygame
 import random
 from pygame.locals import (
+    RLEACCEL,
     K_UP,
     K_DOWN,
     K_LEFT,
@@ -16,58 +17,21 @@ from pygame.locals import (
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 600
 
-
-class Enemy(pygame.sprite.Sprite):
-    def __init__(self):
-        super(Enemy, self).__init__()
-        self.surf = pygame.Surface((5, 10))
-        self.surf.fill((255, 255, 255))
-        self.rect = self.surf.get_rect(
-            center=(
-                random.randint(0, SCREEN_WIDTH),
-                random.randint(SCREEN_HEIGHT - 700, SCREEN_HEIGHT - 450),
-            )
-        )
-        self.speed = random.randint(5, 10)
-
-    # Move the sprite based on speed
-    # Remove it when it passes the left edge of the screen
-    def update(self):
-        self.rect.move_ip(0, self.speed)
-        if self.rect.top < 0:
-            self.kill()
-
-
-class Bullet(pygame.sprite.Sprite):
-    """A class that manages bullets fired by spaceships"""
-
-    def __init__(self, x, y):
-        """Create a bullet object where the ship is located"""
-        pygame.sprite.Sprite.__init__(self)
-        # Create a rectangle at (0,0) to represent the bullet and set the correct position
-        self.surf = pygame.Surface((5, 5))
-        self.surf.fill((255, 255, 255))
-        self.rect = self.surf.get_rect()
-        self.rect.centerx = x
-        self.rect.bottom = y
-        # The location of the bullet is represented by a decimal
-        self.color = (60, 60, 60)
-        self.speedy = -10
-
-    def update(self):
-        """Move the bullet up"""
-        # Update the decimal value that represents the bullet position
-        self.rect.y += self.speedy
-        # kill if it moves off the top of the screen
-        if self.rect.bottom < 0:
-            self.kill()
+# background
+bg = pygame.image.load("./bg.png")
+bg = pygame.transform.scale(bg,(500,600))
+bgX = 0
+bgX2 = bg.get_height()
 
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__()
-        self.surf = pygame.Surface((25, 25))
-        self.surf.fill((255, 255, 255))
+        self.surf = pygame.image.load("Spaceship.png").convert()
+        self.surf = pygame.transform.scale(self.surf,(40,60))
+        self.surf.set_colorkey((255,255,255), RLEACCEL)
+        # self.surf = pygame.Surface((25, 25))
+        # self.surf.fill((255, 255, 255))
         # set rect postition
         self.rect = self.surf.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT-150))
 
@@ -91,10 +55,58 @@ class Player(pygame.sprite.Sprite):
             self.rect.bottom = SCREEN_HEIGHT
 
     def shoot(self):
-        bullet = Bullet(self.rect.centerx, self.rect.top + 75)
-        all_sprites.add(bullets)
-        bullets.add(bullet)
+        bullet = Bullet(self.rect.centerx, self.rect.top)
+        return bullet
+        # all_sprites.add(bullets)
+        # bullets.add(bullet)
 
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self):
+        super(Enemy, self).__init__()
+        self.surf = pygame.image.load("meteor.png").convert()
+        #self.surf = pygame.transform.scale(self.surf,(40,60))
+        self.surf.set_colorkey((0,0,0), RLEACCEL)
+        #self.surf = pygame.Surface((5, 10))
+        #self.surf.fill((255, 255, 255))
+        self.rect = self.surf.get_rect(
+            center=(
+                random.randint(0, SCREEN_WIDTH),
+                random.randint(SCREEN_HEIGHT - 700, SCREEN_HEIGHT - 450),
+            )
+        )
+        self.speed = random.randint(2, 7)
+
+    # Move the sprite based on speed
+    # Remove it when it passes the left edge of the screen
+    def update(self):
+        self.rect.move_ip(0, self.speed)
+        if self.rect.top < 0:
+            self.kill()
+
+
+class Bullet(pygame.sprite.Sprite):
+    """A class that manages bullets fired by spaceships"""
+
+    def __init__(self, x, y):
+        """Create a bullet object where the ship is located"""
+        pygame.sprite.Sprite.__init__(self)
+        self.surf = pygame.Surface((5, 5))
+        self.surf.fill((255, 255, 255))
+        self.rect = self.surf.get_rect()
+        self.rect.centerx = x
+        self.rect.bottom = y
+        # The location of the bullet is represented by a decimal
+        self.color = (60, 60, 60)
+        self.speed = -10
+
+    def update(self):
+        """Move the bullet up"""
+        # Update the decimal value that represents the bullet position
+        self.rect.y += self.speed
+        # kill if it moves off the top of the screen
+        if self.rect.bottom < 0:
+            self.kill()
 
 # initialization
 pygame.init()
@@ -103,29 +115,30 @@ pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 screen.fill((0, 0, 0))
 
-player = Player()
+def draw_background():
+    # first image
+    screen.blit(bg, (0, bgX))
+    #seond image
+    screen.blit(bg, (0, bgX2))
+    pygame.display.update()
+
 # Create a custom event for adding a new enemy
 ADDENEMY = pygame.USEREVENT + 1
 pygame.time.set_timer(ADDENEMY, 250)
 
 # instantiate the player
+player = Player()
 
 # Create groups to hold enemy sprites and all sprites
-# - enemies is used for collision detection and position updates
-# - all_sprites is used for rendering
 enemies = pygame.sprite.Group()
-# planet = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 
-# setup the clock for a decent framerate
+# setup the clock for framerate
 clock = pygame.time.Clock()
 
-# bg = pygame.image.load("bg1.png").convert()
-
-
-# mainloop
+# gameloop
 running = True
 while running:
     for event in pygame.event.get():
@@ -133,8 +146,10 @@ while running:
             player.update(event.key)
             if event.key == K_ESCAPE:
                 running = False
-            elif event.key == K_SPACE:
-                player.shoot()
+            if event.key == K_SPACE:
+                bullet = player.shoot()
+                bullets.add(bullet)
+                all_sprites.add(bullet)
 
         elif event.type == QUIT:
             running = False
@@ -144,7 +159,21 @@ while running:
             new_enemy = Enemy()
             enemies.add(new_enemy)
             all_sprites.add(new_enemy)
-    screen.fill((0, 0, 0))
+      # first image
+    #screen.blit(bg, (0, bgX))
+    #seond image
+    #screen.blit(bg, (0, bgX2))
+    draw_background()
+    bgX -= 1
+    bgX2 -= 1
+    
+    if bgX < bg.get_height() * -1:
+        bgX = bg.get_height()
+
+    if bgX2 < bg.get_height() * -1:
+        bgX2 = bg.get_height()
+
+
     # draw the player to the screen
     for entity in all_sprites:
         screen.blit(entity.surf, entity.rect)
