@@ -30,9 +30,6 @@ class Player(pygame.sprite.Sprite):
         self.surf = pygame.image.load("Spaceship.png").convert()
         self.surf = pygame.transform.scale(self.surf,(40,60))
         self.surf.set_colorkey((255,255,255), RLEACCEL)
-        # self.surf = pygame.Surface((25, 25))
-        # self.surf.fill((255, 255, 255))
-        # set rect postition
         self.rect = self.surf.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT-150))
 
     def update(self, pressed_keys):
@@ -57,18 +54,13 @@ class Player(pygame.sprite.Sprite):
     def shoot(self):
         bullet = Bullet(self.rect.centerx, self.rect.top)
         return bullet
-        # all_sprites.add(bullets)
-        # bullets.add(bullet)
 
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         super(Enemy, self).__init__()
         self.surf = pygame.image.load("meteor.png").convert()
-        #self.surf = pygame.transform.scale(self.surf,(40,60))
         self.surf.set_colorkey((0,0,0), RLEACCEL)
-        #self.surf = pygame.Surface((5, 10))
-        #self.surf.fill((255, 255, 255))
         self.rect = self.surf.get_rect(
             center=(
                 random.randint(0, SCREEN_WIDTH),
@@ -120,7 +112,6 @@ def draw_background():
     screen.blit(bg, (0, bgX))
     #seond image
     screen.blit(bg, (0, bgX2))
-    pygame.display.update()
 
 # Create a custom event for adding a new enemy
 ADDENEMY = pygame.USEREVENT + 1
@@ -159,10 +150,7 @@ while running:
             new_enemy = Enemy()
             enemies.add(new_enemy)
             all_sprites.add(new_enemy)
-      # first image
-    #screen.blit(bg, (0, bgX))
-    #seond image
-    #screen.blit(bg, (0, bgX2))
+  
     draw_background()
     bgX -= 1
     bgX2 -= 1
@@ -194,6 +182,5 @@ while running:
     # update the display
     enemies.update()
     bullets.update()
-    # planet.update()
     pygame.display.flip()
     clock.tick(30)
