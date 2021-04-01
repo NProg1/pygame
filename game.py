@@ -18,7 +18,7 @@ SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 600
 
 # background
-bg = pygame.image.load("./bg.png")
+bg = pygame.image.load("assets/bg.png")
 bg = pygame.transform.scale(bg,(500,600))
 bgX = 0
 bgX2 = bg.get_height()
@@ -27,7 +27,7 @@ bgX2 = bg.get_height()
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__()
-        self.surf = pygame.image.load("Spaceship.png").convert()
+        self.surf = pygame.image.load("assets/Spaceship.png").convert()
         self.surf = pygame.transform.scale(self.surf,(40,60))
         self.surf.set_colorkey((255,255,255), RLEACCEL)
         self.rect = self.surf.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT-150))
@@ -59,7 +59,7 @@ class Player(pygame.sprite.Sprite):
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         super(Enemy, self).__init__()
-        self.surf = pygame.image.load("meteor.png").convert()
+        self.surf = pygame.image.load("assets/meteor.png").convert()
         self.surf.set_colorkey((0,0,0), RLEACCEL)
         self.rect = self.surf.get_rect(
             center=(
